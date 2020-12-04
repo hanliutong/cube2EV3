@@ -1,0 +1,5 @@
+PyUserInput==0.1.11
+pywin32==228
+pykeyboard==0.1.1
+pymouse==1.0
+win32gui==221.6
