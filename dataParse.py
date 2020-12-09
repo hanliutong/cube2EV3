@@ -1,69 +1,5 @@
-import cv2
-import numpy as np
 import requests
-import win32gui
-import win32api
-import win32con
-from pymouse import *
-from pykeyboard import *
-from win32con import KEYEVENTF_KEYUP
-from win32api import keybd_event
-import time
-from PIL import ImageGrab
-from aip import AipOcr
-import xlwt
-
-
-def judgeColor(hsv):
-    h,s,v=hsv[0],hsv[1],hsv[2]
-    if h>=24 and h<=45 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'Y'
-    elif h>=0 and h<=180 and s>=0 and s<=105 and v>=155 and v<=255:
-        return 'W'
-    elif h>=156 and h<=169 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'R'
-    elif h>=0 and h<=5 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'R'
-    elif h>=45 and h<=86 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'G'
-    elif h>=170 and h<=180 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'O'
-    elif h>=6 and h<=23 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'O'
-    elif h>=100 and h<=124 and s>=43 and s<=255 and v>=46 and v<=255:
-        return 'B'
-    return 'X'
-
-def findMost(y,x):
-    tempData={'B':0,'G':0,'W':0,'Y':0,'O':0,'R':0}
-    for i in range(-5,6):
-        for j in range(-5,6):
-            #print(str(x+i)+'---'+str(y+i))
-            #print(judgeColor(hsv[x+i,y+i]))
-            t = judgeColor(hsv[x+i,y+i])
-            if t in tempData.keys():
-                tempData[t]+=1
-    flag = -1
-    k = ''
-    for key, value in tempData.items():
-        #print(tempData.get(key))
-        if value > flag:
-            flag = value
-            k = key
-    return k
-
-def solve():
-    result=[]
-    result.append(findMost(225,145))
-    result.append(findMost(295,145))
-    result.append(findMost(365,145))
-    result.append(findMost(225,215))
-    result.append(findMost(295,215))
-    result.append(findMost(365,215))
-    result.append(findMost(225,285))
-    result.append(findMost(295,285))
-    result.append(findMost(365,285))
-    return result
+import json
 
 def solve3(c1,c2,c3):
     t=[c1,c2,c3]
@@ -128,7 +64,7 @@ def solve1(c):
         return '49'
     return False
 
-def sss(n,f):
+def solveAll(n,f):
         t=solve3(n.get('G')[0],n.get('W')[6],n.get('O')[2])
         if t == False:
             print('输入有误')
@@ -281,102 +217,24 @@ def output(f):
 		t.append(int(i))
 	return t
 
-def check_dic(n):
-    for v in n.values():
-        if v == '#':
-            return False
-    return True
-
-def reset_window_pos(targetTitle):
-    hWndList = []
-    win32gui.EnumWindows(lambda hWnd, param: param.append(hWnd), hWndList)
-    for hwnd in hWndList:
-          clsname = win32gui.GetClassName(hwnd)
-          title = win32gui.GetWindowText(hwnd)
-          if (title.find(targetTitle) >= 0): #调整目标窗口到坐标(600,300),大小设置为(600,600)
-              win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 0,0,1280,1280, win32con.SWP_SHOWWINDOW)
-
-def auto_run(steps):
-    reset_window_pos("ROBOTC-Trial")
-    m = PyMouse()
-    k = PyKeyboard()
-    a = m.position()
-    print(a)
-
-    m.click(505, 419)
-
-    for x in steps:
-        k.tap_key(x)
-        time.sleep(0.01)
-
-    m.click(794, 75) ##下载
-    m.click(556, 470) ##运行
-
-if __name__=='__main__':
-    while True:
-        fflag=True
-        result = {'O':'#','B':'#','R':'#','Y':'#','W':'#','G':'#'}
-        #获取摄像头视频
-        cap = cv2.VideoCapture(0)
-        # 获取视频宽度
-        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        #frame_width = 100
-        # 获取视频高度
-        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        #frame_height = 100
-        long=70
-        num=0
-        tempSolve=''
-        print('输入s进行捕获，输入q退出')
-        while (cap.isOpened()):
-            ret,frame = cap.read()  
-            cv2.rectangle(frame, (180,100), (180+long,100+long), (0,255,0), 2)
-            cv2.rectangle(frame, (180+long,100), (180+2*long,100+long), (0,255,0), 2)
-            cv2.rectangle(frame, (180+2*long,100), (180+3*long,100+long), (0,255,0), 2)
-            cv2.rectangle(frame, (180,100+long), (180+long,100+2*long), (0,255,0), 2)
-            cv2.rectangle(frame, (180+long,100+long), (180+2*long,100+2*long), (0,255,0), 2)
-            cv2.rectangle(frame, (180+2*long,100+long), (180+3*long,100+2*long), (0,255,0), 2)
-            cv2.rectangle(frame, (180,100+2*long), (180+long,100+3*long), (0,255,0), 2)
-            cv2.rectangle(frame, (180+long,100+2*long), (180+2*long,100+3*long), (0,255,0), 2)
-            cv2.rectangle(frame, (180+2*long,100+2*long), (180+3*long,100+3*long), (0,255,0), 2)
-            cv2.imshow("real_time",frame)
-            k = cv2.waitKey(1) & 0xFF
-            if k == ord('q'):
-                fflag=False
-                break
-            elif k == ord('s'):
-                img=frame
-                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-                tempSolve=solve()
-                print(tempSolve)
-                num+=1
-                print('capture'+str(num))
-                print('解析是否正确，若正确输入y,错误则进行重新获取图像即可')
-            elif k == ord('y'):
-                if result[tempSolve[4]]=='#':
-                    result[tempSolve[4]]=tempSolve
-                    print('当前存储的数据信息:')
-                    print(result)
-                    print('\n')
-                else:
-                    print('该面已经拍照,无需重复拍照')
-            if check_dic(result):
-                break
-        cap.release()
-        cv2.destroyAllWindows()
-        print(result)
-        originData={'W':['#' for i in range(9)],'Y':['#' for i in range(9)],'B':['#' for i in range(9)],\
-        'G':['#' for i in range(9)],'O':['#' for i in range(9)],'R':['#' for i in range(9)]}
-        if fflag == False:
-            break
-        if sss(result,originData):
+def parse(result):
+    originData={'W':['#' for i in range(9)],'Y':['#' for i in range(9)],'B':['#' for i in range(9)],\
+    'G':['#' for i in range(9)],'O':['#' for i in range(9)],'R':['#' for i in range(9)]}
+    if result == 'q':
+        print('用户退出，程序结束')
+        return True
+    else:
+        if solveAll(result,originData):
+            url='http://czx.ac.cn:8080/solve'
             r=output(originData)
-            print(r)
-            post=requests.post("39.97.212.230:8080/cube2arr", data=r, headers={"Content-Type": "none"})
-            break
+            re=json.dumps(r)
+            myobj={'state':re}
+            x=requests.post(url,data=myobj)
+            print(x.json()['solve_text'])
+            finalData=''
+            for i in x.json()['solve_text']:
+                finalData+=i+' '
+            finalData=finalData.strip()
+            return True
         else:
-            pass
-        
-        
-    
-    
+            return False
