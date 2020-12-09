@@ -73,6 +73,19 @@ def colorToRGB(color):
     else:
         return [0,0,0]
 
+def tips(n):
+    if n==0:
+        print('中间块绿色朝摄像头，白色朝上')
+    elif n==1:
+        print('中间块红色朝摄像头，白色朝上')
+    elif n==2:
+        print('中间块橙色朝摄像头，白色朝上')
+    elif n==3:
+        print('中间块蓝色朝摄像头，黄色朝上')
+    elif n==4:
+        print('中间块黄色朝摄像头，绿色朝上')
+    elif n==5:
+        print('中间块白色朝摄像头，蓝色朝上')
 def showTem(tempSolve,frame):
     l=50
     RGB=colorToRGB(tempSolve[0])
@@ -107,7 +120,9 @@ def captureGraph():
     long=70
     num=0
     tempSolve=['X','X','X','X','X','X','X','X','X']
+    c=0
     print('输入s进行捕获，输入q退出')
+    tips(c)
     while (cap.isOpened()):
         ret,frame = cap.read()  
         cv2.rectangle(frame, (180,100), (180+long,100+long), (0,255,0), 2)
@@ -132,15 +147,17 @@ def captureGraph():
             tempSolve=solve(hsv)
             print(tempSolve)
             num+=1
-            print('capture'+str(num))
+            #print('capture'+str(num))
             print('解析是否正确，若正确输入y,错误则进行重新按获取图像即可')
         elif k == ord('y'):
             if result[tempSolve[4]]=='#':
+                c+=1
+                tips(c)
                 result[tempSolve[4]]=tempSolve
                 cv2.imshow("real_time",frame)
-                print('当前存储的数据信息:')
-                print(result)
-                print('\n')
+                #print('当前存储的数据信息:')
+                #print(result)
+                #print('\n')
             else:
                 print('该面已经拍照,无需重复拍照')
         if check_dic(result):
