@@ -65,6 +65,7 @@ def solve1(c):
     return False
 
 def solveAll(n,f):
+    try :
         t=solve3(n.get('G')[0],n.get('W')[6],n.get('O')[2])
         if t == False:
             print('输入有误')
@@ -200,6 +201,9 @@ def solveAll(n,f):
         f.get('Y')[4]=solve1(n.get('Y')[4])
         f.get('B')[4]=solve1(n.get('B')[4])
         return True
+    except :
+        raise UserWarning("Invalid Input!")
+        
 
 def output(f):
 	t=[]
@@ -216,6 +220,15 @@ def output(f):
 	for i in f.get('G'):
 		t.append(int(i))
 	return t
+
+def color2array(date):
+    try :
+        f={'W':['#' for i in range(9)],'Y':['#' for i in range(9)],'B':['#' for i in range(9)],'G':['#' for i in range(9)],'O':['#' for i in range(9)],'R':['#' for i in range(9)]}
+        solveAll(date,f)
+        result = output(f)
+        return result
+    except :
+        raise UserWarning("Invalid Input!")
 
 def parse(result):
     originData={'W':['#' for i in range(9)],'Y':['#' for i in range(9)],'B':['#' for i in range(9)],\
