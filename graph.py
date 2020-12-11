@@ -1,5 +1,20 @@
+# coding=utf-8
 import cv2
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+
+def cv2ImgAddText(img, text, left, top, textColor=(0, 255, 0), textSize=20):
+    if (isinstance(img, np.ndarray)):  # 判断是否OpenCV图片类型
+        img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    # 创建一个可以在给定图像上绘图的对象
+    draw = ImageDraw.Draw(img)
+    # 字体的格式
+    fontStyle = ImageFont.truetype(
+        "font/simsun.ttc", textSize, encoding="utf-8")
+    # 绘制文本
+    draw.text((left, top), text, textColor, font=fontStyle)
+    # 转换回OpenCV格式
+    return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
 def judgeColor(hsv):
     h,s,v=hsv[0],hsv[1],hsv[2]
@@ -73,21 +88,34 @@ def colorToRGB(color):
     else:
         return [0,0,0]
 
-def tips(n):
-    if n==0:
-        print('中间块绿色朝摄像头，白色朝上')
-    elif n==1:
-        print('中间块红色朝摄像头，白色朝上')
-    elif n==2:
-        print('中间块橙色朝摄像头，白色朝上')
-    elif n==3:
-        print('中间块蓝色朝摄像头，黄色朝上')
-    elif n==4:
-        print('中间块黄色朝摄像头，绿色朝上')
-    elif n==5:
-        print('中间块白色朝摄像头，蓝色朝上')
+def tips(c,frame):
+    if c==0:
+        return cv2ImgAddText(frame,'A:绿色块中心向前,白色中心块向上',160, 50, (55,255,155), 20)
+    elif c==1:
+        return cv2ImgAddText(frame,'B:红色块中心向前,白色中心块向上',160, 50, (55,255,155), 20)
+    elif c==2:
+        return cv2ImgAddText(frame,'C:橙色块中心向前,白色中心块向上',160, 50, (55,255,155), 20)
+    elif c==3:
+        return cv2ImgAddText(frame,'D:蓝色块中心向前,黄色中心块向上',160, 50, (55,255,155), 20)
+    elif c==4:
+        return cv2ImgAddText(frame,'E:黄色块中心向前,绿色中心块向上',160, 50, (55,255,155), 20)
+    elif c==5:
+        return cv2ImgAddText(frame,'F:白色块中心向前,蓝色中心块向上',160, 50, (55,255,155), 20)
+
+def tips2(state,frame):
+    if state==0:
+        return cv2ImgAddText(frame,'按s捕获,q退出',160,340, (55,255,155), 20)
+    elif state==1:
+        return cv2ImgAddText(frame,'若结果正确按y,错误继续s捕获',160,340, (55,255,155), 20)
+    elif state==2:
+        return cv2ImgAddText(frame,'存储成功,继续s捕获',160,340, (55,255,155), 20)
+    elif state==3:
+        return cv2ImgAddText(frame,'该面已经拍照,无需重复拍照',160,340, (55,255,155), 20)
+    elif state==4:
+        return cv2ImgAddText(frame,'上次捕获有错误,重新按s捕获',160,340, (55,255,155), 20)
 def showTem(tempSolve,frame):
     l=50
+    location=[]
     RGB=colorToRGB(tempSolve[0])
     cv2.rectangle(frame, (461,101), (509,149), (RGB[2],RGB[1],RGB[0]), -1)
     RGB=colorToRGB(tempSolve[1])
@@ -106,7 +134,17 @@ def showTem(tempSolve,frame):
     cv2.rectangle(frame, (461+l,101+2*l), (509+l,149+2*l), (RGB[2],RGB[1],RGB[0]), -1)
     RGB=colorToRGB(tempSolve[8])
     cv2.rectangle(frame, (461+2*l,101+2*l), (509+2*l,149+2*l), (RGB[2],RGB[1],RGB[0]), -1)
-def captureGraph():
+
+def showTem2(tempList,frame):
+    l=30
+    location=[[46,101,74,129],[46,221,74,249],[46,341,74,369],[440,101,468,129],[440,221,468,249],[440,341,468,369]]
+    x=[0,1,2,0,1,2,0,1,2]
+    y=[0,0,0,1,1,1,2,2,2]
+    for i in location:
+        for j in range(9):
+            RGB=colorToRGB(tempList[location.index(i)][j])
+            cv2.rectangle(frame, (i[0]+l*x[j],i[1]+l*y[j]), (i[2]+l*x[j],i[3]+l*y[j]), (RGB[2],RGB[1],RGB[0]), -1)
+def captureGraph(w):
     fflag=True
     result = {'O':'#','B':'#','R':'#','Y':'#','W':'#','G':'#'}
     #获取摄像头视频
@@ -117,12 +155,18 @@ def captureGraph():
     # 获取视频高度
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     #frame_height = 100
+    #print(frame_height)
     long=70
+    state=0
     num=0
     tempSolve=['X','X','X','X','X','X','X','X','X']
+    tempList=[['X','X','X','X','X','X','X','X','X'] for i in range(6)]
     c=0
+    if w==0:
+        state=0
+    elif w==1:
+        state=4
     print('输入s进行捕获，输入q退出')
-    tips(c)
     while (cap.isOpened()):
         ret,frame = cap.read()  
         cv2.rectangle(frame, (180,100), (180+long,100+long), (0,255,0), 2)
@@ -134,31 +178,51 @@ def captureGraph():
         cv2.rectangle(frame, (180,100+2*long), (180+long,100+3*long), (0,255,0), 2)
         cv2.rectangle(frame, (180+long,100+2*long), (180+2*long,100+3*long), (0,255,0), 2)
         cv2.rectangle(frame, (180+2*long,100+2*long), (180+3*long,100+3*long), (0,255,0), 2)
-        cv2.putText(frame,'Identify Results',(440,80),cv2.FONT_HERSHEY_SIMPLEX,0.8,(55,255,155),2)
-        showTem(tempSolve,frame)
+        #cv2.putText(frame,'Identify Results',(440,80),cv2.FONT_HERSHEY_SIMPLEX,0.8,(55,255,155),2)
+        cv2.rectangle(frame, (46,75), (58,95), (0,0,0), -1)
+        cv2.putText(frame,'A',(46,91),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
+        cv2.rectangle(frame, (46,195), (58,215), (0,0,0), -1)
+        cv2.putText(frame,'B',(46,211),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
+        cv2.rectangle(frame, (46,315), (58,335), (0,0,0), -1)
+        cv2.putText(frame,'C',(46,331),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
+        cv2.rectangle(frame, (440,75), (452,95), (0,0,0), -1)
+        cv2.putText(frame,'D',(440,91),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
+        cv2.rectangle(frame, (440,195), (452,215), (0,0,0), -1)
+        cv2.putText(frame,'E',(440,211),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
+        cv2.rectangle(frame, (440,315), (452,335), (0,0,0), -1)
+        cv2.putText(frame,'F',(440,331),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
+        cv2.rectangle(frame, (155,50), (500,72), (0,0,0), -1)
+        cv2.rectangle(frame, (155,340), (430,360), (0,0,0), -1)
+        showTem2(tempList,frame)
+        frame=tips(c,frame)
+        frame=tips2(state,frame)
         cv2.imshow("real_time",frame)
         k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
             fflag=False
             break
         elif k == ord('s'):
+            state=1
             img=frame
             hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             tempSolve=solve(hsv)
+            tempList[c]=tempSolve
             print(tempSolve)
             num+=1
             #print('capture'+str(num))
             print('解析是否正确，若正确输入y,错误则进行重新按获取图像即可')
         elif k == ord('y'):
             if result[tempSolve[4]]=='#':
+                state=2
                 c+=1
-                tips(c)
                 result[tempSolve[4]]=tempSolve
+                print(tempList)
                 cv2.imshow("real_time",frame)
                 #print('当前存储的数据信息:')
                 #print(result)
                 #print('\n')
             else:
+                state=3
                 print('该面已经拍照,无需重复拍照')
         if check_dic(result):
             break
