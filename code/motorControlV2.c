@@ -83,7 +83,8 @@ void turnSide(tMotor side) {
   		break;
   	}
 	  speed = KP_BACK_1 * err;
-	  if(side == leftMotor) speed *= 1.03;
+	  //if(side == rightMotor) speed *= 0.98;
+	  //if(side == leftMotor) speed *= 1.1;
 	  motor[side] = CONSTRAIN(speed, 13, 23);
 	  sleep(10);
 	}
@@ -120,7 +121,7 @@ void turnCube() {
 		float rotationAdjust = 1.0 * (getMotorEncoder(leftMotor) - getMotorEncoder(rightMotor) - err);
 
 		motor[leftMotor] = 1.1 * CONSTRAIN(speedL, 3, 13);
-		motor[rightMotor] = CONSTRAIN(speedR, 3, 13);
+		motor[rightMotor] = 0.98 * CONSTRAIN(speedR, 3, 13);
 
 	  sleep(10);
 	}
@@ -143,7 +144,7 @@ void turnCube() {
 		float rotationAdjust = 1.0 * (getMotorEncoder(leftMotor) - getMotorEncoder(rightMotor) - err);
 
 		motor[leftMotor] = 1.1 * CONSTRAIN(speedL, 3, 13);
-		motor[rightMotor] = CONSTRAIN(speedR, 3, 13);
+		motor[rightMotor] = 0.98 * CONSTRAIN(speedR, 3, 13);
 
 	  sleep(10);
 	}

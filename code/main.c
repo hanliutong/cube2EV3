@@ -4,6 +4,10 @@
 #include "io.h"
 #include "step.h"
 
+int i_left;
+int i_right;
+int i_back;
+
 task main()
 {
 	//turnCube();
@@ -17,6 +21,16 @@ task main()
 	//char step[] = "D' B' R' U D' F D' B' R' D R";
 	//char step[] = "L L L L R' R' R' R' B B' U U' F F' D D'";
 	//char step[] = "D F B R' B' U B' D L D L' D' D' U' F R F B U L' F' L F U' F' L' F L";
+
+	/*while(true) {
+		motor[leftMotor] = 100;
+		i_left = getMotorEncoder(leftMotor);
+		motor[rightMotor] = 100;
+		i_right = getMotorEncoder(rightMotor);
+		motor[backMotor] = 100;
+		i_back = getMotorEncoder(backMotor);
+	}*/
+
 
 
 	resetMotor();
