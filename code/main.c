@@ -2,6 +2,7 @@
 #include "motorControlV2.c"
 #include "move2MotorV2.c"
 #include "io.h"
+#include "step.h"
 
 task main()
 {
@@ -15,7 +16,7 @@ task main()
 	//char step[] = "R' D' R B D F' D U' R B D";
 	//char step[] = "D' B' R' U D' F D' B' R' D R";
 	//char step[] = "L L L L R' R' R' R' B B' U U' F F' D D'";
-	char step[] = "D F B R' B' U B' D L D L' D' D' U' F R F B U L' F' L F U' F' L' F L";
+	//char step[] = "D F B R' B' U B' D L D L' D' D' U' F R F B U L' F' L F U' F' L' F L";
 
 
 	resetMotor();

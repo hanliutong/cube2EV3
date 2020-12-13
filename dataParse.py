@@ -229,25 +229,36 @@ def color2array(date):
         return result
     except :
         raise UserWarning("Invalid Input!")
+def post(state):
+    url='http://czx.ac.cn:8080/solve'
+    myobj={'state':str(state)}
+    x=requests.post(url,data=myobj)
+    finalData=''
+    for i in x.json()['solve_text']:
+        finalData+=i+' '
+    finalData=finalData.strip()
+    print(finalData)
+    return finalData
 
 def parse(result):
     originData={'W':['#' for i in range(9)],'Y':['#' for i in range(9)],'B':['#' for i in range(9)],\
     'G':['#' for i in range(9)],'O':['#' for i in range(9)],'R':['#' for i in range(9)]}
     if result == 'q':
         print('用户退出，程序结束')
-        return True
+        exit(0)
     else:
         if solveAll(result,originData):
-            url='http://czx.ac.cn:8080/solve'
+            # url='http://czx.ac.cn:8080/solve'
             r=output(originData)
-            re=json.dumps(r)
-            myobj={'state':re}
-            x=requests.post(url,data=myobj)
-            print(x.json()['solve_text'])
-            finalData=''
-            for i in x.json()['solve_text']:
-                finalData+=i+' '
-            finalData=finalData.strip()
-            return True
+            # re=json.dumps(r)
+            # myobj={'state':re}
+            # x=requests.post(url,data=myobj)
+            # # print(x.json()['solve_text'])
+            # finalData=''
+            # for i in x.json()['solve_text']:
+            #     finalData+=i+' '
+            # finalData=finalData.strip()
+            # print(finalData)
+            return post(r)
         else:
-            return False
+            raise UserWarning("Solve failes!")

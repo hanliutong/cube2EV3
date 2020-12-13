@@ -1,3 +1,4 @@
 cube
 *.pyc
 __pycache__
+code/step.h

@@ -19,6 +19,14 @@ class Cube2arrTest(unittest.TestCase):
                     self.assertRaises(UserWarning, dataParse.color2array, data)
                 elif file.startswith("t_"): #以t_开头，与ans比对
                     self.assertTrue((data['ans'] == dataParse.color2array(data)))
-
+    def test_post(self):
+        path = 'testset/' #测试集文件夹
+        files= os.listdir(path)
+        for file in files: #遍历文件夹
+            if not os.path.isdir(file): #判断是否是文件夹，不是文件夹才打开
+                data = readTestSet(path+file)
+                if file.startswith("t_"): #以t_开头，与ans比对         
+                    print("testing..."+file)         
+                    self.assertTrue((data['step'] == dataParse.post(data["ans"])))
 if __name__ == '__main__':
     unittest.main()
