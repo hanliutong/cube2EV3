@@ -3,6 +3,9 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
+
+
+
 def cv2ImgAddText(img, text, left, top, textColor=(0, 255, 0), textSize=20):
     if (isinstance(img, np.ndarray)):  # 判断是否OpenCV图片类型
         img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
@@ -144,6 +147,27 @@ def showTem2(tempList,frame):
         for j in range(9):
             RGB=colorToRGB(tempList[location.index(i)][j])
             cv2.rectangle(frame, (i[0]+l*x[j],i[1]+l*y[j]), (i[2]+l*x[j],i[3]+l*y[j]), (RGB[2],RGB[1],RGB[0]), -1)
+
+def findLocation(xx,yy):
+    l=30
+    location=[[46,101,74,129],[46,221,74,249],[46,341,74,369],[440,101,468,129],[440,221,468,249],[440,341,468,369]]
+    x=[0,1,2,0,1,2,0,1,2]
+    y=[0,0,0,1,1,1,2,2,2]
+    for i in location:
+        for j in range(9):
+            if i[0]+l*x[j]<=xx and i[2]+l*x[j]>= xx and i[1]+l*y[j]<=yy and i[3]+l*y[j]>=yy:
+                return [location.index(i),j]
+    return[-1,-1]
+
+def nextColor(color):
+    c=['G','B','W','Y','R','O']
+    if color=='O':
+        return 'G'
+    elif color=='X':
+        return 'G'
+    else:
+        return c[c.index(color)+1]
+        
 def captureGraph(w):
     fflag=True
     result = {'O':'#','B':'#','R':'#','Y':'#','W':'#','G':'#'}
@@ -161,6 +185,20 @@ def captureGraph(w):
     num=0
     tempSolve=['X','X','X','X','X','X','X','X','X']
     tempList=[['X','X','X','X','X','X','X','X','X'] for i in range(6)]
+    def mouse_click(event, x, y, flags, para):
+        nonlocal tempList
+        nonlocal tempSolve
+        if event == cv2.EVENT_LBUTTONDOWN:  # 左边鼠标点击
+            #print('PIX:', x, y)
+            location=findLocation(x,y)
+            if not location[0]==-1:
+                #print(location)
+                tempList[location[0]][location[1]]=nextColor(tempList[location[0]][location[1]])
+                tempSolve[location[1]]=tempList[location[0]][location[1]]
+                #print("BGR:", img[y, x])
+                #print("GRAY:", gray[y, x])
+                #print("HSV:", hsv[y, x])
+                #print(judgeColor(hsv[y, x]))
     c=0
     if w==0:
         state=0
@@ -193,8 +231,12 @@ def captureGraph(w):
         cv2.putText(frame,'F',(440,331),cv2.FONT_HERSHEY_SIMPLEX,0.6,(55,255,155),2)
         cv2.rectangle(frame, (155,50), (500,72), (0,0,0), -1)
         cv2.rectangle(frame, (155,340), (430,360), (0,0,0), -1)
+        cv2.rectangle(frame, (155,370), (430,390), (0,0,0), -1)
+        frame=cv2ImgAddText(frame,'注:可点击识别色块改变颜色',160, 370, (55,255,155), 20)
         showTem2(tempList,frame)
         frame=tips(c,frame)
+        cv2.namedWindow("real_time")
+        cv2.setMouseCallback("real_time", mouse_click)
         frame=tips2(state,frame)
         cv2.imshow("real_time",frame)
         k = cv2.waitKey(1) & 0xFF
@@ -202,6 +244,8 @@ def captureGraph(w):
             fflag=False
             break
         elif k == ord('s'):
+            #存储
+            #cv2.imwrite(r'./testgraph/'+str(c)+r'.jpg',frame)
             state=1
             img=frame
             hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)

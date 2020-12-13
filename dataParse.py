@@ -232,6 +232,7 @@ def color2array(date):
 def post(state):
     url='http://czx.ac.cn:8080/solve'
     myobj={'state':str(state)}
+    print(state)
     x=requests.post(url,data=myobj)
     finalData=''
     for i in x.json()['solve_text']:
