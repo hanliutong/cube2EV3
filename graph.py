@@ -245,7 +245,6 @@ def captureGraph(w):
             break
         elif k == ord('s'):
             #存储
-            #cv2.imwrite(r'./testgraph/'+str(c)+r'.jpg',frame)
             state=1
             img=frame
             hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -257,6 +256,7 @@ def captureGraph(w):
             print('解析是否正确，若正确输入y,错误则进行重新按获取图像即可')
         elif k == ord('y'):
             if result[tempSolve[4]]=='#':
+                #cv2.imwrite(r'./testgraph/'+str(c)+r'.jpg',frame)
                 state=2
                 c+=1
                 result[tempSolve[4]]=tempSolve
